@@ -9,13 +9,11 @@ DOMAIN_NAME="prasanth.cloud" # replace with your domain
 for instance in "${INSTANCES[@]}"
 do 
 INSTANCE_ID=$(aws ec2 run-instances --image-id ami-0220d79f3f480ecf5 --instance-type t3.micro --security-group-ids sg-0f5412cdc13f94a03 --tag-specifications "ResourceType=instance,Tags=[{Key=Name, Value=$instance}]" --query "Instances[0].InstanceId" --output text)
-    if [ $instance -ne "frontend"]
+    if [ $instance -ne "frontend" ]
     then 
         IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].PrivateIpAddress" --output text)
-        RECORD_NAME="$instance.$DOMAIN_NAME"
     else 
         IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
-        RECORD_NAME="$instance.$DOMAIN_NAME"
     fi 
     echo "public IP of $instance is :: $IP"
 done 
