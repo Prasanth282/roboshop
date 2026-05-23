@@ -2,11 +2,11 @@
 
 AMI_ID="ami-0220d79f3f480ecf5"
 SG_ID="sg-0f5412cdc13f94a03" # replace with your SG ID
-INSTANCES=("mongodb" "redis" "mysql" "rabbitmq" "catalogue" "user" "cart" "shipping" "payment" "dispatch" "frontend")
+INSTANCES="$@"
 ZONE_ID="Z048072823O7GVQTMRCAZ" # replace with your ZONE ID
 DOMAIN_NAME="prasanth.cloud" # replace with your domain
 
-for instance in "${INSTANCES[@]}"
+for instance in "$@"
 do 
 INSTANCE_ID=$(aws ec2 run-instances --image-id ami-0220d79f3f480ecf5 --instance-type t3.small --security-group-ids sg-0f5412cdc13f94a03 --tag-specifications "ResourceType=instance,Tags=[{Key=Name, Value=$instance}]" --query "Instances[0].InstanceId" --output text)
     if [ $instance -ne "frontend" ]
