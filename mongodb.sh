@@ -7,7 +7,7 @@ Y=\e[33m
 
 USERID=$(id -u)
 
-if [ @USERID -ne 0 ]
+if [ $USERID -ne 0 ]
 then 
     echo "error :: you don't have root user privlages "
     exit 1
@@ -16,7 +16,7 @@ else
 fi 
 
 
-VALIDATE() [
+VALIDATE() {
     if [ $1 -eq 0 ]
     then 
         echo " $2 is success "
@@ -25,7 +25,7 @@ VALIDATE() [
     fi     
     
 
-]
+}
 
 FOLDER_PATH="/var/log/shell-scripts"
 SCRIPT_NAME="$0"
