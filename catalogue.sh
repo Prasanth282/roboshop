@@ -33,15 +33,15 @@ LOG_FILE="$FOLDER_PATH/$SCRIPT_NAME.log"
 
 mkdir -p $FOLDER_PATH 
 
-echo "script executed date is :: $(date)" | tee -a $LOG_FILE
+echo "script executed date is :: $(date)" &>> $LOG_FILE
 
 dnf module disable nodejs -y | tee -a $LOG_FILE
 VALIDATE $? "disabling nodejs module"
 
-dnf module enable nodejs:20 -y | tee -a $LOG_FILE
+dnf module enable nodejs:20 -y &>> $LOG_FILE
 VALIDATE $? "enabling nodejs module"
 
-dnf install nodejs -y | tee -a $LOG_FILE
+dnf install nodejs -y &>> $LOG_FILE
 VALIDATE $? "installing nodejs"
 
 mkdir -p /app 
@@ -60,14 +60,13 @@ fi
 rm -rf /app/*
 
 
-curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip | tee -a $LOG_FILE
-VALIDATE $? "downloading catalogue code"
+curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip &>> $LOG_FILE
 
 cd /app 
 VALIDATE $? "changing directory to /app" 
 
 unzip /tmp/catalogue.zip
-VALIDATE $? "unzipping catalogue code" tee -a | tee -a $LOG_FILE
+VALIDATE $? "unzipping catalogue code" tee -a &>> $LOG_FILE
 
 cd /app 
 VALIDATE $? "changing directory to /app" 
@@ -76,10 +75,10 @@ npm install | tee -a $LOG_FILE
 VALIDATE $? "installing nodejs dependencies"
 
 cp catalogue.service /etc/systemd/system/catalogue.service
-VALIDATE $? "copying catalogue systemd service file"  | tee -a $LOG_FILE
+VALIDATE $? "copying catalogue systemd service file"   &>> $LOG_FILE
 
 systemctl daemon-reload
-VALIDATE $? "reloading systemd daemon"  | tee -a $LOG_FILE
+VALIDATE $? "reloading systemd daemon"  &>> $LOG_FILE
 
 systemctl enable catalogue.service 
 VALIDATE $? "enabling catalogue service" 
@@ -90,15 +89,15 @@ VALIDATE $? "starting catalogue service"
 cp mongodb /etc/yum.repos.d/mongo.repo
 VALIDATE $? "copying mongo.repo" 
 
-dnf install mongodb-mongosh -y | tee -a $LOG_FILE
+dnf install mongodb-mongosh -y | &>> $LOG_FILE
 VALIDATE $? "installing mongodb shell"
 
 
-STATUS=$(mongosh --host mongodb.prasanth.cloud </app/db/master-data.js --eval db.getMongo().getDBNames().indexOf("catalogue"))
+STATUS=$(mongosh --host mongodb.prasanth.cloud </app/db/master-data.js --eval 'db.getMongo().getDBNames().indexOf("catalogue")' --quiet)
 if [ $STATUS -lt 0 ]
 then 
-    echo "catalogue database is not present.. loading the data..."
-    mongosh --host mongodb.prasanth.cloud </app/db/master-data.js
+    echo "catalogue database is not present.. loading the data..." 
+    mongosh --host mongodb.prasanth.cloud </app/db/master-data.js &>> $LOG_FILE
     VALIDATE $? "loading catalogue data to mongodb"
 else 
     echo " catalogue database is already present.. skipping data load"
