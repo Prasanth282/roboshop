@@ -47,43 +47,64 @@ VALIDATE $? "installing nodejs"
 mkdir -p /app 
 VALIDATE $? "creating app directory"
 
-useradd --system --home /app --shell /sbin/nologin --comment" roboshop user" roboshop 
-VALIDATE $? "creating roboshop user"
+id roboshop 
+if [ $? -ne 0 ]
+then 
+    echo " roboshop user doesn't exist, creating it "
+    useradd --system --home /app --shell /sbin/nologin --comment" roboshop user" roboshop  
+    VALIDATE $? "creating roboshop user" $>>$LOG_FILE
+else 
+    echo " roboshop user already exists "
+fi
+
+rm -rf /app/ *
+
+cd -p /app
+VALIDATE $? "changing directory to /app" $>>$LOG_FILE
 
 curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip | tee -a $LOG_FILE
 VALIDATE $? "downloading catalogue code"
 
-cd /app
-VALIDATE $? "changing directory to /app"
 
 unzip /tmp/catalogue.zip
-VALIDATE $? "unzipping catalogue code"
+VALIDATE $? "unzipping catalogue code" tee -a | tee -a $LOG_FILE
 
 cd /app 
-VALIDATE $? "changing directory to /app"
+VALIDATE $? "changing directory to /app" 
 
 npm install | tee -a $LOG_FILE
 VALIDATE $? "installing nodejs dependencies"
 
 cp catalogue.service /etc/systemd/system/catalogue.service
-VALIDATE $? "copying catalogue systemd service file"
+VALIDATE $? "copying catalogue systemd service file"  | tee -a $LOG_FILE
 
 systemctl daemon-reload
-VALIDATE $? "reloading systemd daemon"
+VALIDATE $? "reloading systemd daemon"  | tee -a $LOG_FILE
 
 systemctl enable catalogue.service 
-VALIDATE $? "enabling catalogue service"
+VALIDATE $? "enabling catalogue service" 
 
 systemctl start catalogue.service 
 VALIDATE $? "starting catalogue service"
 
 cp mongodb /etc/yum.repos.d/mongo.repo
-VALIDATE $? "copying mongo.repo"
+VALIDATE $? "copying mongo.repo" 
 
 dnf install mongodb-mongosh -y | tee -a $LOG_FILE
 VALIDATE $? "installing mongodb shell"
 
-mongosh --host MONGODB-SERVER-IPADDRESS </app/db/master-data.js
+
+STATUS=$(mongosh --host mongodb.prasanth.cloud </app/db/master-data.js --eval db.getMongo().getDBNames().indexOf("catalogue") --quiet)
+if [ $STATUS -lt 0 ]]
+then 
+    echo "catalogue database is not present.. loading the data..."
+    mongosh --host mongodb.prasanth.cloud </app/db/master-data.js
+    VALIDATE $? "loading catalogue data to mongodb"
+else 
+    echo " catalogue database is already present.. skipping data load"
+    
+    exit 1 
+fi
 
 
 
