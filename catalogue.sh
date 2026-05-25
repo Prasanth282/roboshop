@@ -57,7 +57,7 @@ else
     echo " roboshop user already exists "
 fi
 
-rm -rf /app/ *
+rm -rf /app/*
 
 
 curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip | tee -a $LOG_FILE
