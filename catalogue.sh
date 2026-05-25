@@ -35,7 +35,7 @@ mkdir -p $FOLDER_PATH
 
 echo "script executed date is :: $(date)" &>> $LOG_FILE
 
-dnf module disable nodejs -y | tee -a $LOG_FILE
+dnf module disable nodejs -y &>> $LOG_FILE
 VALIDATE $? "disabling nodejs module"
 
 dnf module enable nodejs:20 -y &>> $LOG_FILE
