@@ -59,12 +59,12 @@ fi
 
 rm -rf /app/ *
 
-cd -p /app
-VALIDATE $? "changing directory to /app" $>>$LOG_FILE
 
 curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip | tee -a $LOG_FILE
 VALIDATE $? "downloading catalogue code"
 
+cd /app 
+VALIDATE $? "changing directory to /app" 
 
 unzip /tmp/catalogue.zip
 VALIDATE $? "unzipping catalogue code" tee -a | tee -a $LOG_FILE
@@ -95,7 +95,7 @@ VALIDATE $? "installing mongodb shell"
 
 
 STATUS=$(mongosh --host mongodb.prasanth.cloud </app/db/master-data.js --eval db.getMongo().getDBNames().indexOf("catalogue") --quiet)
-if [ $STATUS -lt 0 ]]
+if [ $STATUS -lt 0 ]
 then 
     echo "catalogue database is not present.. loading the data..."
     mongosh --host mongodb.prasanth.cloud </app/db/master-data.js
