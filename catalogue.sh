@@ -93,11 +93,11 @@ dnf install mongodb-mongosh -y | &>> $LOG_FILE
 VALIDATE $? "installing mongodb shell"
 
 
-STATUS=$(mongosh --host mongodb.prasanth.cloud </app/db/master-data.js --eval 'db.getMongo().getDBNames().indexOf("catalogue")' --quiet)
+STATUS=$(mongosh --host mongodb.prasanth.cloud --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
 if [ $STATUS -lt 0 ]
 then 
     echo "catalogue database is not present.. loading the data..." 
-    mongosh --host mongodb.prasanth.cloud </app/db/master-data.js &>> $LOG_FILE
+    mongosh --host mongodb.prassanth.cloud </app/db/master-data.js &>> $LOG_FILE
     VALIDATE $? "loading catalogue data to mongodb"
 else 
     echo " catalogue database is already present.. skipping data load"
